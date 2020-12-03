@@ -26,8 +26,7 @@ fn main() {
 
     let map: Vec<Vec<char>> = buf
         .lines()
-        .map(|l| l.expect("Could not parse line."))
-        .map(|l| l.chars().collect::<Vec<char>>())
+        .map(|l| l.expect("Could not parse line.").chars().collect::<Vec<char>>())
         .collect();
 
     // Part 1
