@@ -1,0 +1,77 @@
+extern crate regex;
+
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+#[derive(Debug, Default)]
+struct Passport {
+    byr: i32,
+    iyr: i32,
+    eyr: i32,
+    hgt: String,
+    hcl: String,
+    ecl: String,
+    pid: String,
+    cid: String,
+}
+
+fn main() {
+    let file = File::open("./input/input.txt").expect("No such file.");
+    let buf = BufReader::new(file);
+
+    let lines: Vec<String> = buf
+        .lines()
+        .map(|line| line.expect("Could not parse line."))
+        .collect();
+
+    let mut passport_lines: Vec<String> = Vec::new();
+    print!("Passport data count: {}", passport_lines.len());
+    let mut parts: Vec<&str> = Vec::new();
+    for i in 0..lines.len() {
+        let line = &lines[i].trim();
+
+        if line.is_empty() {
+            /* Push the parts vector onto the passports vector and reset the parts vector */
+            passport_lines.push(parts.join(" "));
+            parts = vec![];
+        } else {
+            /* add the line to the parts vector */
+            parts.push(&line);
+
+            if i == lines.len() - 1 {
+                /* This is the last line so push to the passports vector */
+                passport_lines.push(parts.join(" "));
+                parts = vec![];
+            }
+        }
+    };
+
+    //println!("{:?}", passport_lines);
+
+    let passports: Vec<Passport> = passport_lines.iter()
+        .map(|passport_string| {
+            let mut passport: Passport = Passport::default();
+
+            for pair in passport_string.split(" ") {
+                let key_vec: Vec<&str> = pair.split(":").collect();
+                let v = key_vec[1];
+                match key_vec[0] {
+                    "byr" => passport.byr = v.parse::<i32>().unwrap(),
+                    "iyr" => passport.iyr = v.parse::<i32>().unwrap(),
+                    "eyr" => passport.eyr = v.parse::<i32>().unwrap(),
+                    "hgt" => passport.hgt = v.to_string(),
+                    "hcl" => passport.hcl = v.to_string(),
+                    "ecl" => passport.ecl = v.to_string(),
+                    "pid" => passport.pid = v.to_string(),
+                    "cid" => passport.cid = v.to_string(),
+                    _ => panic!("Invalid line")
+                }
+            }
+            return passport;
+        })
+        .filter(|passport| !passport.cid.is_empty())
+        .collect();
+
+    println!("{:?}", passports.len());
+}
+
